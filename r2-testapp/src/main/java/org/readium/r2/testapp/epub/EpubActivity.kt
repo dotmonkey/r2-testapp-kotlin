@@ -587,7 +587,7 @@ class EpubActivity : R2EpubActivity(), CoroutineScope, NavigatorDelegate/*, Visu
 
                                 }
                             }
-                        }, 1200)
+                        }, 2400)
                     } catch (e: Exception) {
                     }
                 }
