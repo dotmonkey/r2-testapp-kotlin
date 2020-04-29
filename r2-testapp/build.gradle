@@ -55,10 +55,23 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+    if(project.hasProperty("RELEASE_STORE_FILE")) {
+        signingConfigs {
+            release {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if(project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     packagingOptions {
@@ -107,7 +120,9 @@ dependencies {
         implementation project(':r2-lcp')
     }
 
-
+    if (findProject(':navigator-extension')) {
+        implementation project(':navigator-extension')
+    }
     implementation('com.mcxiaoke.koi:core:0.5.5') {
         exclude module: 'support-v4'
     }

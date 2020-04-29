@@ -33,6 +33,7 @@ import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.design.longSnackbar
 import org.readium.r2.testapp.BuildConfig.DEBUG
 import org.readium.r2.lcp.public.*
+import org.readium.r2.navigator.NavigatorExtension
 import org.readium.r2.shared.Injectable
 import org.readium.r2.shared.Publication
 import org.readium.r2.shared.drm.DRM
@@ -49,7 +50,7 @@ import java.io.File
 import java.net.URL
 import kotlin.coroutines.CoroutineContext
 
-class CatalogActivity : LibraryActivity(), LCPLibraryActivityService, CoroutineScope, DRMLibraryService, LCPAuthenticating, LCPAuthenticationDelegate {
+open class CatalogActivity : LibraryActivity(), LCPLibraryActivityService, CoroutineScope, DRMLibraryService, LCPAuthenticating, LCPAuthenticationDelegate {
 
 
     /**
@@ -68,7 +69,7 @@ class CatalogActivity : LibraryActivity(), LCPLibraryActivityService, CoroutineS
         listener = this
     }
 
-    private var authenticationCallbacks: MutableMap<String, (String?) -> Unit> = mutableMapOf()
+    protected var authenticationCallbacks: MutableMap<String, (String?) -> Unit> = mutableMapOf()
 
     override val brand: DRM.Brand
         get() = DRM.Brand.lcp
@@ -328,7 +329,15 @@ class CatalogActivity : LibraryActivity(), LCPLibraryActivityService, CoroutineS
                     prepareToServe(pub, book.fileName!!, file.absolutePath, add = false, lcp = true)
                     server.addEpub(publication, pub.container, "/" + book.fileName, applicationContext.filesDir.path + "/" + Injectable.Style.rawValue + "/UserProperties.json")
 
-                    this@CatalogActivity.startActivity(intentFor<EpubActivity>("publicationPath" to publicationPath, "publicationFileName" to book.fileName, "publication" to publication, "bookId" to book.id, "drm" to true))
+                    val cls = NavigatorExtension.getEpubActivityClass() ?: EpubActivity::class.java
+                    val intent = Intent(this@CatalogActivity,cls)
+                    intent.putExtra("publicationPath",publicationPath)
+                    intent.putExtra("publicationFileName",book.fileName)
+                    intent.putExtra("publication",publication)
+                    intent.putExtra("bookId", book.id)
+                    intent.putExtra("drm", true)
+                    this@CatalogActivity.startActivity(intent)
+                    //this@CatalogActivity.startActivity(intentFor<EpubActivity>("publicationPath" to publicationPath, "publicationFileName" to book.fileName, "publication" to publication, "bookId" to book.id, "drm" to true))
                 }
             }
         }

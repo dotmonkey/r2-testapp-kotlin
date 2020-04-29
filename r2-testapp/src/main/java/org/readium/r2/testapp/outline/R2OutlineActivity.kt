@@ -37,19 +37,27 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 
-class R2OutlineActivity : AppCompatActivity() {
+open class R2OutlineActivity : AppCompatActivity() {
 
+    protected  lateinit var tabHost: TabHost
     private lateinit var preferences:SharedPreferences
     private lateinit var bookmarkDB: BookmarksDatabase
-    private lateinit var highlightsDB: HighligtsDatabase
+    protected lateinit var highlightsDB: HighligtsDatabase
     private lateinit var positionsDB: PositionsDatabase
+    open var tagNames:List<Int> = listOf<Int>()
 
+    open fun setResultData(d:Intent){
+
+    }
+    open fun createHighlightAdapter(act: R2OutlineActivity, highlights: MutableList<Highlight>, publication: Publication):BaseAdapter{
+        return HighlightsAdapter(act,highlights,publication)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_outline)
         preferences = getSharedPreferences("org.readium.r2.settings", Context.MODE_PRIVATE)
 
-        val tabHost = findViewById<TabHost>(R.id.tabhost)
+        tabHost = findViewById<TabHost>(R.id.tabhost)
         tabHost.setup()
 
         val publication = intent.getSerializableExtra("publication") as Publication
@@ -105,6 +113,7 @@ class R2OutlineActivity : AppCompatActivity() {
                 }
 
                 setResult(Activity.RESULT_OK, intent)
+                setResultData(intent)
                 finish()
             }
         }
@@ -136,6 +145,7 @@ class R2OutlineActivity : AppCompatActivity() {
             val intent = Intent()
             intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = bookmarkProgression),null))
             setResult(Activity.RESULT_OK, intent)
+            setResultData(intent)
             finish()
         }
 
@@ -143,7 +153,7 @@ class R2OutlineActivity : AppCompatActivity() {
         highlightsDB = HighligtsDatabase(this)
 
         val highlights = highlightsDB.highlights.listAll(bookID).sortedWith(compareBy({it.resourceIndex},{ it.location.progression })).toMutableList()
-        val highlightsAdapter = HighlightsAdapter(this, highlights, publication)
+        val highlightsAdapter = createHighlightAdapter(this, highlights, publication) //HighlightsAdapter(this, highlights, publication)
         highlight_list.adapter = highlightsAdapter
         highlight_list.setOnItemClickListener { _, _, position, _ ->
             //Link to the resource in the publication
@@ -155,6 +165,7 @@ class R2OutlineActivity : AppCompatActivity() {
             val intent = Intent()
             intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = highlightProgression),null))
             setResult(Activity.RESULT_OK, intent)
+            setResultData(intent)
             finish()
 
         }
@@ -165,8 +176,8 @@ class R2OutlineActivity : AppCompatActivity() {
         positionsDB = PositionsDatabase(this)
 
         val pageList = publication.pageList
-
-        if (pageList.isNotEmpty()) {
+        val page_list = findViewById<ListView>(R.id.page_list)
+        if (pageList.isNotEmpty() && page_list!=null) {
             val pageListAdapter = NavigationAdapter(this, pageList.toMutableList())
             page_list.adapter = pageListAdapter
 
@@ -181,6 +192,7 @@ class R2OutlineActivity : AppCompatActivity() {
                 val intent = Intent()
                 intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = 0.0),null))
                 setResult(Activity.RESULT_OK, intent)
+                setResultData(intent)
                 finish()
 
             }
@@ -206,6 +218,7 @@ class R2OutlineActivity : AppCompatActivity() {
                     val intent = Intent()
                     intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = pageProgression), null))
                     setResult(Activity.RESULT_OK, intent)
+                    setResultData(intent)
                     finish()
                 }
             }
@@ -217,8 +230,10 @@ class R2OutlineActivity : AppCompatActivity() {
          */
         val landmarks = publication.landmarks
 
-        val landmarksAdapter = NavigationAdapter(this, landmarks.toMutableList())
-        landmarks_list.adapter = landmarksAdapter
+        val landmarks_list = findViewById<ListView>(R.id.landmarks_list)
+        if(landmarks_list!=null) {
+            val landmarksAdapter = NavigationAdapter(this, landmarks.toMutableList())
+            landmarks_list.adapter = landmarksAdapter
 
         landmarks_list.setOnItemClickListener { _, _, position, _ ->
 
@@ -227,11 +242,13 @@ class R2OutlineActivity : AppCompatActivity() {
             val resourceHref = link.href?: ""
             val resourceType = link.typeLink?: ""
 
-            val intent = Intent()
-            intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = 0.0),null))
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+                val intent = Intent()
+                intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = 0.0), null))
+                setResult(Activity.RESULT_OK, intent)
+                setResultData(intent)
+                finish()
 
+            }
         }
 
 
@@ -241,26 +258,43 @@ class R2OutlineActivity : AppCompatActivity() {
         // Setting up tabs
 
         val tabTOC: TabHost.TabSpec = tabHost.newTabSpec("Content")
-        tabTOC.setIndicator(tabTOC.tag)
+        if(tagNames.size>=1){
+            val str = resources.getString(tagNames[0])
+            tabTOC.setIndicator(str)
+        }else{
+            tabTOC.setIndicator(tabTOC.tag)
+        }
         tabTOC.setContent(R.id.toc_tab)
 
         val tabBookmarks: TabHost.TabSpec = tabHost.newTabSpec("Bookmarks")
-        tabBookmarks.setIndicator(tabBookmarks.tag)
+        if(tagNames.size>=2){
+            val str = resources.getString(tagNames[1])
+            tabBookmarks.setIndicator(str)
+        }else{
+            tabBookmarks.setIndicator(tabBookmarks.tag)
+        }
         tabBookmarks.setContent(R.id.bookmarks_tab)
 
         val tabHighlights: TabHost.TabSpec = tabHost.newTabSpec("Highlights")
-        tabHighlights.setIndicator(tabHighlights.tag)
+        if(tagNames.size>=3){
+            val str = resources.getString(tagNames[2])
+            tabHighlights.setIndicator(str)
+        }else{
+            tabHighlights.setIndicator(tabHighlights.tag)
+        }
         tabHighlights.setContent(R.id.highlights_tab)
-
-        val tabPageList: TabHost.TabSpec = tabHost.newTabSpec("Page List")
-        tabPageList.setIndicator(tabPageList.tag)
-        tabPageList.setContent(R.id.pagelists_tab)
-
-
-        val tabLandmarks: TabHost.TabSpec = tabHost.newTabSpec("Landmarks")
-        tabLandmarks.setIndicator(tabLandmarks.tag)
-        tabLandmarks.setContent(R.id.landmarks_tab)
-
+        var tabPageList: TabHost.TabSpec? = null
+        if(page_list!=null) {
+            tabPageList = tabHost.newTabSpec("Page List")
+            tabPageList.setIndicator(tabPageList.tag)
+            tabPageList.setContent(R.id.pagelists_tab)
+        }
+        var tabLandmarks: TabHost.TabSpec? = null
+        if(landmarks_list!=null) {
+            tabLandmarks= tabHost.newTabSpec("Landmarks")
+            tabLandmarks.setIndicator(tabLandmarks.tag)
+            tabLandmarks.setContent(R.id.landmarks_tab)
+        }
 
         when (publication.type) {
             Publication.TYPE.AUDIO -> {
@@ -273,8 +307,12 @@ class R2OutlineActivity : AppCompatActivity() {
                 tabHost.addTab(tabTOC)
                 tabHost.addTab(tabBookmarks)
                 tabHost.addTab(tabHighlights)
-                tabHost.addTab(tabPageList)
-                tabHost.addTab(tabLandmarks)
+                if(page_list!=null){
+                    tabHost.addTab(tabPageList)
+                }
+                if(landmarks_list!=null){
+                    tabHost.addTab(tabLandmarks)
+                }
             }
         }
     }
@@ -373,8 +411,9 @@ class R2OutlineActivity : AppCompatActivity() {
             if (item is Pair<*, *>) {
                 item as Pair<Int, Link>
                 viewHolder.navigationTextView?.text = item.second.title
-                val parameter = viewHolder.indentationView?.layoutParams
-                parameter?.width = item.first * 50
+                //val parameter = viewHolder.indentationView?.layoutParams
+                //parameter?.width = item.first * 50
+                viewHolder.indentationView?.layoutParams = LinearLayout.LayoutParams(item.first * 50,ViewGroup.LayoutParams.MATCH_PARENT)
             } else {
                 item as Link
                 viewHolder.navigationTextView?.text = item.title
