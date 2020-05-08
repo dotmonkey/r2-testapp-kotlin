@@ -46,7 +46,7 @@ open class UserSettings(var preferences: SharedPreferences, val context: Context
     private var verticalScroll = false
 
     //Advanced settings
-    private var publisherDefaults = false
+    protected var publisherDefaults = false
     private var textAlignment = 0
     private var columnCount = 0
     private var wordSpacing = 0f
