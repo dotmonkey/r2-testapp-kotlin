@@ -820,7 +820,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
         }
      */
 
-    val annotation = getAnnotation(highlight!!)
+        val annotation = highlight?.let { getAnnotation(highlight) }
 
         with(view) {
             val note = findViewById<EditText>(R.id.note)
