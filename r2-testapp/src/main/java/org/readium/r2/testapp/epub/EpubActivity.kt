@@ -645,13 +645,14 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
                 return
             }
         }
-        var highlight: org.readium.r2.navigator.epub.Highlight? = null
+        val highlight: org.readium.r2.navigator.epub.Highlight? = getHighlight(highlightID!!)
 
+        /*
         highlightID?.let { id ->
             highlightDB.highlights.list(id).forEach {
                 highlight = convertHighlight2NavigationHighlight(it)
             }
-        }
+        }*/
 
         val display = windowManager.defaultDisplay
         val rect = size ?: Rect()
@@ -754,9 +755,13 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
         )
     }
 
-    private fun deleteHighlight(highlight: org.readium.r2.navigator.epub.Highlight?) {
+    override fun removeHighlight(highlight: org.readium.r2.navigator.epub.Highlight) {
+        highlightDB.highlights.delete(highlight.id)
+    }
+
+    open fun deleteHighlight(highlight: org.readium.r2.navigator.epub.Highlight?) {
         highlight?.let {
-            highlightDB.highlights.delete(it.id)
+            removeHighlight(it)
             hideHighlightWithID(it.id)
             popupWindow?.dismiss()
             mode?.finish()
@@ -769,26 +774,53 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
         )
     }
 
+    override fun getHighlight(bookId:Int,href:String):List<org.readium.r2.navigator.epub.Highlight>{
+        val res = mutableListOf<org.readium.r2.navigator.epub.Highlight>()
+        highlightDB.highlights.listAll(bookId.toLong(), href).forEach {
+            val highlight = convertHighlight2NavigationHighlight(it)
+            res.add(highlight)
+        }
+        return res
+    }
     private fun drawHighlight() {
         val resource = publication.readingOrder[resourcePager.currentItem]
-        highlightDB.highlights.listAll(bookId, resource.href!!).forEach {
-            val highlight = convertHighlight2NavigationHighlight(it)
-            showHighlight(highlight)
+        getHighlight(bookId.toInt(), resource.href!!).forEach {
+            //val highlight = convertHighlight2NavigationHighlight(it)
+            showHighlight(it)
         }
     }
 
-    private fun showAnnotationPopup(highlight: org.readium.r2.navigator.epub.Highlight? = null) {
+    override fun getAnnotation(highlight: org.readium.r2.navigator.epub.Highlight): String? {
+        val annotation = highlight.run {
+            highlightDB.highlights.list(id).first().run {
+                if (annotation.isEmpty() and annotationMarkStyle.isEmpty()) ""
+                else annotation
+            }
+        }
+        return annotation
+    }
+
+    override fun getHighlight(id: String): org.readium.r2.navigator.epub.Highlight? {
+        val h = highlightDB.highlights.list(id).first()
+        return convertHighlight2NavigationHighlight(h)
+    }
+
+    protected fun showAnnotationPopup(highlight: org.readium.r2.navigator.epub.Highlight? = null) {
         val view = layoutInflater.inflate(R.layout.popup_note, null, false)
         val alert = AlertDialog.Builder(this)
                 .setView(view)
                 .create()
 
+    /*
         val annotation = highlight?.run {
             highlightDB.highlights.list(id).first().run {
                 if (annotation.isEmpty() and annotationMarkStyle.isEmpty()) ""
                 else annotation
             }
         }
+     */
+
+    val annotation = getAnnotation(highlight!!)
 
         with(view) {
             val note = findViewById<EditText>(R.id.note)
@@ -823,6 +855,8 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
 
     override fun onPageLoaded(webView: R2BasicWebView) {
         super.onPageLoaded(webView)
+        val scr = userSettings.preferences.getBoolean(SCROLL_REF,false)
+        webView.setScrollMode(scr)
         drawHighlight()
 
         for(e in NavigatorExtension.allExtension){
@@ -838,8 +872,8 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
     }
 
     override fun highlightAnnotationMarkActivated(id: String) {
-        val highlight = highlightDB.highlights.list(id.replace("ANNOTATION", "HIGHLIGHT")).first()
-        showAnnotationPopup(convertHighlight2NavigationHighlight(highlight))
+        //val highlight = highlightDB.highlights.list(id.replace("ANNOTATION", "HIGHLIGHT")).first()
+        showAnnotationPopup(getHighlight(id))
     }
 
     private fun convertNavigationHighlight2Highlight(highlight: org.readium.r2.navigator.epub.Highlight, annotation: String? = null, annotationMarkStyle: String? = null): Highlight {
