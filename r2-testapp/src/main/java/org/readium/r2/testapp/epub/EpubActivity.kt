@@ -645,7 +645,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
                 return
             }
         }
-        val highlight: org.readium.r2.navigator.epub.Highlight? = getHighlight(highlightID!!)
+        val highlight: org.readium.r2.navigator.epub.Highlight? = highlightID?.let { getHighlight(highlightID) }
 
         /*
         highlightID?.let { id ->
