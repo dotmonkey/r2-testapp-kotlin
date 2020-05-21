@@ -126,8 +126,8 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
     private lateinit var searchResultAdapter: SearchLocatorAdapter
     private lateinit var searchResult: MutableList<SearchLocator>
 
-    private var mode: ActionMode? = null
-    private var popupWindow: PopupWindow? = null
+    protected var mode: ActionMode? = null
+    protected var popupWindow: PopupWindow? = null
 
     /**
      * Manage activity creation.
@@ -639,7 +639,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
         }
     }
 
-    private fun showHighlightPopup(highlightID: String? = null, size: Rect?, dismissCallback: () -> Unit) {
+    open fun showHighlightPopup(highlightID: String? = null, size: Rect?, dismissCallback: () -> Unit) {
         popupWindow?.let {
             if (it.isShowing) {
                 return
