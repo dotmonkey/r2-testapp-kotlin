@@ -246,7 +246,9 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
      */
     override fun onPause() {
         super.onPause()
-        screenReader.pauseReading()
+        if (this::screenReader.isInitialized) {
+            screenReader.pauseReading()
+        }
     }
 
     /**
