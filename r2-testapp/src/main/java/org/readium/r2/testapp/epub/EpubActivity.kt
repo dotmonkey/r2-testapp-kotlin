@@ -722,7 +722,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
 
     }
 
-    protected fun changeHighlightColor(highlight: org.readium.r2.navigator.epub.Highlight? = null, color: Int) {
+    open fun changeHighlightColor(highlight: org.readium.r2.navigator.epub.Highlight? = null, color: Int) {
         if (highlight != null) {
             val navigatorHighlight = org.readium.r2.navigator.epub.Highlight(
                     highlight.id,
