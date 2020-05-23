@@ -83,7 +83,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
         }
 
     override fun locationDidChange(navigator: Navigator?, locator: Locator) {
-        booksDB.books.saveProgression(locator, bookId)
+        if(!customDB) booksDB.books.saveProgression(locator, bookId)
 
         if (locator.locations?.progression == 0.toDouble()) {
             screenReader.currentUtterance = 0
@@ -128,6 +128,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
 
     protected var mode: ActionMode? = null
     protected var popupWindow: PopupWindow? = null
+    open val customDB = false
 
     /**
      * Manage activity creation.
@@ -141,10 +142,12 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
             finish()
         }
         super.onCreate(savedInstanceState)
-        bookmarksDB = BookmarksDatabase(this)
-        booksDB = BooksDatabase(this)
-        positionsDB = PositionsDatabase(this)
-        highlightDB = HighligtsDatabase(this)
+        if(!customDB){
+            bookmarksDB = BookmarksDatabase(this)
+            booksDB = BooksDatabase(this)
+            positionsDB = PositionsDatabase(this)
+            highlightDB = HighligtsDatabase(this)
+        }
 
         navigatorDelegate = this
         bookId = intent.getLongExtra("bookId", -1)

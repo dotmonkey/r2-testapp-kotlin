@@ -45,6 +45,7 @@ open class R2OutlineActivity : AppCompatActivity() {
     protected lateinit var highlightsDB: HighligtsDatabase
     private lateinit var positionsDB: PositionsDatabase
     open var tagNames:List<Int> = listOf<Int>()
+    open val customDB = false
 
     open fun setResultData(d:Intent){
 
@@ -118,113 +119,115 @@ open class R2OutlineActivity : AppCompatActivity() {
             }
         }
 
+        if(!customDB) {
 
-        /*
+            /*
          * Retrieve the list of bookmarks
          */
-        bookmarkDB = BookmarksDatabase(this)
+            bookmarkDB = BookmarksDatabase(this)
 
-        val bookID = intent.getLongExtra("bookId", -1)
-        val bookmarks = bookmarkDB.bookmarks.list(bookID).sortedWith(compareBy({it.resourceIndex},{ it.location.progression })).toMutableList()
+            val bookID = intent.getLongExtra("bookId", -1)
+            val bookmarks = bookmarkDB.bookmarks.list(bookID).sortedWith(compareBy({ it.resourceIndex }, { it.location.progression })).toMutableList()
 
-        val bookmarksAdapter = BookMarksAdapter(this, bookmarks, publication)
+            val bookmarksAdapter = BookMarksAdapter(this, bookmarks, publication)
 
-        bookmark_list.adapter = bookmarksAdapter
-
-
-        bookmark_list.setOnItemClickListener { _, _, position, _ ->
-
-            //Link to the resource in the publication
-            val bookmark = bookmarks[position]
-            val resourceHref = bookmark.resourceHref
-            val resourceType = bookmark.resourceType
-
-            //Progression of the selected bookmark
-            val bookmarkProgression = bookmarks[position].location.progression
-
-            val intent = Intent()
-            intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = bookmarkProgression),null))
-            setResult(Activity.RESULT_OK, intent)
-            setResultData(intent)
-            finish()
-        }
+            bookmark_list.adapter = bookmarksAdapter
 
 
-        highlightsDB = HighligtsDatabase(this)
-
-        val highlights = highlightsDB.highlights.listAll(bookID).sortedWith(compareBy({it.resourceIndex},{ it.location.progression })).toMutableList()
-        val highlightsAdapter = createHighlightAdapter(this, highlights, publication) //HighlightsAdapter(this, highlights, publication)
-        highlight_list.adapter = highlightsAdapter
-        highlight_list.setOnItemClickListener { _, _, position, _ ->
-            //Link to the resource in the publication
-            val highlight = highlights[position]
-            val resourceHref = highlight.resourceHref
-            val resourceType = highlight.resourceType
-            //Progression of the selected bookmark
-            val highlightProgression = highlights[position].location.progression
-            val intent = Intent()
-            intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = highlightProgression),null))
-            setResult(Activity.RESULT_OK, intent)
-            setResultData(intent)
-            finish()
-
-        }
-
-        /*
-         * Retrieve the page list
-         */
-        positionsDB = PositionsDatabase(this)
-
-        val pageList = publication.pageList
-        val page_list = findViewById<ListView>(R.id.page_list)
-        if (pageList.isNotEmpty() && page_list!=null) {
-            val pageListAdapter = NavigationAdapter(this, pageList.toMutableList())
-            page_list.adapter = pageListAdapter
-
-            page_list.setOnItemClickListener { _, _, position, _ ->
+            bookmark_list.setOnItemClickListener { _, _, position, _ ->
 
                 //Link to the resource in the publication
-                val link = pageList[position]
-                val resourceHref = link.href?: ""
-                val resourceType = link.typeLink?: ""
+                val bookmark = bookmarks[position]
+                val resourceHref = bookmark.resourceHref
+                val resourceType = bookmark.resourceType
 
+                //Progression of the selected bookmark
+                val bookmarkProgression = bookmarks[position].location.progression
 
                 val intent = Intent()
-                intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = 0.0),null))
+                intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = bookmarkProgression), null))
+                setResult(Activity.RESULT_OK, intent)
+                setResultData(intent)
+                finish()
+            }
+
+
+
+            highlightsDB = HighligtsDatabase(this)
+
+            val highlights = highlightsDB.highlights.listAll(bookID).sortedWith(compareBy({ it.resourceIndex }, { it.location.progression })).toMutableList()
+            val highlightsAdapter = createHighlightAdapter(this, highlights, publication) //HighlightsAdapter(this, highlights, publication)
+            highlight_list.adapter = highlightsAdapter
+            highlight_list.setOnItemClickListener { _, _, position, _ ->
+                //Link to the resource in the publication
+                val highlight = highlights[position]
+                val resourceHref = highlight.resourceHref
+                val resourceType = highlight.resourceType
+                //Progression of the selected bookmark
+                val highlightProgression = highlights[position].location.progression
+                val intent = Intent()
+                intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = highlightProgression), null))
                 setResult(Activity.RESULT_OK, intent)
                 setResultData(intent)
                 finish()
 
             }
-        } else {
-            if (positionsDB.positions.has(bookID)) {
-                val jsonPageList = positionsDB.positions.getSyntheticPageList(bookID)
 
-                val syntheticPageList = Position.fromJSON(jsonPageList!!)
+            /*
+         * Retrieve the page list
+         */
+            positionsDB = PositionsDatabase(this)
 
-                val syntheticPageListAdapter = SyntheticPageListAdapter(this, syntheticPageList)
-                page_list.adapter = syntheticPageListAdapter
+            val pageList = publication.pageList
+            val page_list = findViewById<ListView>(R.id.page_list)
+            if (pageList.isNotEmpty() && page_list != null) {
+                val pageListAdapter = NavigationAdapter(this, pageList.toMutableList())
+                page_list.adapter = pageListAdapter
 
                 page_list.setOnItemClickListener { _, _, position, _ ->
 
                     //Link to the resource in the publication
+                    val link = pageList[position]
+                    val resourceHref = link.href ?: ""
+                    val resourceType = link.typeLink ?: ""
 
-                    val page = syntheticPageList[position]
-                    val resourceHref = page.href?: ""
-                    val resourceType = page.type?: ""
-
-                    val pageProgression = syntheticPageList[position].progression
 
                     val intent = Intent()
-                    intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = pageProgression), null))
+                    intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = 0.0), null))
                     setResult(Activity.RESULT_OK, intent)
                     setResultData(intent)
                     finish()
+
+                }
+            } else {
+                if (positionsDB.positions.has(bookID)) {
+                    val jsonPageList = positionsDB.positions.getSyntheticPageList(bookID)
+
+                    val syntheticPageList = Position.fromJSON(jsonPageList!!)
+
+                    val syntheticPageListAdapter = SyntheticPageListAdapter(this, syntheticPageList)
+                    page_list.adapter = syntheticPageListAdapter
+
+                    page_list.setOnItemClickListener { _, _, position, _ ->
+
+                        //Link to the resource in the publication
+
+                        val page = syntheticPageList[position]
+                        val resourceHref = page.href ?: ""
+                        val resourceType = page.type ?: ""
+
+                        val pageProgression = syntheticPageList[position].progression
+
+                        val intent = Intent()
+                        intent.putExtra("locator", Locator(resourceHref, resourceType, publication.metadata.title, Locations(progression = pageProgression), null))
+                        setResult(Activity.RESULT_OK, intent)
+                        setResultData(intent)
+                        finish()
+                    }
                 }
             }
+
         }
-
-
         /*
          * Retrieve the landmarks
          */

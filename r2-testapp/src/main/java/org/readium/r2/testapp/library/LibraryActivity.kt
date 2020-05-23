@@ -136,6 +136,7 @@ open class LibraryActivity : AppCompatActivity(), BooksAdapter.RecyclerViewClick
     private lateinit var alertDialog: AlertDialog
 
     protected var listener: LibraryActivity? = null
+    open val customDB = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -164,13 +165,16 @@ open class LibraryActivity : AppCompatActivity(), BooksAdapter.RecyclerViewClick
         permissionHelper = PermissionHelper(this, permissions)
 
         opdsDownloader = OPDSDownloader(this)
-        database = BooksDatabase(this)
-        books = database.books.list()
+        if(!customDB) {
+            database = BooksDatabase(this)
+            books = database.books.list()
 
-        positionsDB = PositionsDatabase(this)
+            positionsDB = PositionsDatabase(this)
 
-        booksAdapter = BooksAdapter(this, books, this)
-
+            booksAdapter = BooksAdapter(this, books, this)
+        }else{
+            books = mutableListOf()
+        }
         parseIntent(null)
 
 
@@ -185,7 +189,9 @@ open class LibraryActivity : AppCompatActivity(), BooksAdapter.RecyclerViewClick
 
             catalogView = recyclerView {
                 layoutManager = GridAutoFitLayoutManager(this@LibraryActivity, 120)
-                adapter = booksAdapter
+                if(!customDB) {
+                    adapter = booksAdapter
+                }
 
                 lparams {
                     elevation = 2F
@@ -255,7 +261,7 @@ open class LibraryActivity : AppCompatActivity(), BooksAdapter.RecyclerViewClick
 
     override fun onResume() {
         super.onResume()
-        booksAdapter.notifyDataSetChanged()
+        if(!customDB) booksAdapter.notifyDataSetChanged()
     }
 
 
