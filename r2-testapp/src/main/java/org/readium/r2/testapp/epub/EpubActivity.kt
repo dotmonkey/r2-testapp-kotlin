@@ -810,7 +810,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
         return convertHighlight2NavigationHighlight(h)
     }
 
-    protected fun showAnnotationPopup(highlight: org.readium.r2.navigator.epub.Highlight? = null) {
+    open fun showAnnotationPopup(highlight: org.readium.r2.navigator.epub.Highlight? = null) {
         val view = layoutInflater.inflate(R.layout.popup_note, null, false)
         val alert = AlertDialog.Builder(this)
                 .setView(view)
