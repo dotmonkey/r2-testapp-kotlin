@@ -103,6 +103,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
     //Accessibility
     protected var isExploreByTouchEnabled = false
     protected lateinit var tts_overlay_variable : ConstraintLayout
+    protected lateinit var search_overlay_variable : ConstraintLayout
     private var pageEnded = false
 
     // Provide access to the Bookmarks & Positions Databases
@@ -117,14 +118,14 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
     private var menuDrm: MenuItem? = null
     private var menuToc: MenuItem? = null
     private var menuBmk: MenuItem? = null
-    private var menuSearch: MenuItem? = null
+    protected var menuSearch: MenuItem? = null
 
     private var menuScreenReader: MenuItem? = null
 
-    private var searchTerm = ""
-    private lateinit var searchStorage: SharedPreferences
-    private lateinit var searchResultAdapter: SearchLocatorAdapter
-    private lateinit var searchResult: MutableList<SearchLocator>
+    protected var searchTerm = ""
+    protected lateinit var searchStorage: SharedPreferences
+    protected lateinit var searchResultAdapter: SearchLocatorAdapter
+    protected lateinit var searchResult: MutableList<SearchLocator>
 
     protected var mode: ActionMode? = null
     protected var popupWindow: PopupWindow? = null
@@ -166,6 +167,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
         resourcePager.setBackgroundColor(Color.parseColor(backgroundsColors[appearancePref]))
         (resourcePager.focusedChild?.findViewById(org.readium.r2.navigator.R.id.book_title) as? TextView)?.setTextColor(Color.parseColor(textColors[appearancePref]))
         tts_overlay_variable = tts_overlay
+        search_overlay_variable = search_overlay
         toggleActionBar()
 
         resourcePager.offscreenPageLimit = 1
