@@ -43,7 +43,47 @@
             app:layout_constraintStart_toStartOf="@id/search_overlay"
             app:layout_constraintTop_toTopOf="@id/search_overlay" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/search_toolbar"
+        android:visibility="invisible"
+        android:background="@drawable/searchbar_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="40dp"
+        android:padding="10dp"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/btn_search_prev"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:scaleType="center"
+            android:src="@drawable/searchprevious_icon_3x"
+            />
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/btn_search_all"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="35dp"
+            android:layout_marginEnd="35dp"
+            android:scaleType="center"
+            android:src="@drawable/searchread_icon_3x"/>
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/btn_search_next"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:scaleType="center"
+            android:src="@drawable/searchnext_icon_3x"/>
+    </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:visibility="invisible"
+        android:id="@+id/searchFragmentView"/>
     <androidx.constraintlayout.widget.ConstraintLayout
 
         android:id="@+id/tts_overlay"
