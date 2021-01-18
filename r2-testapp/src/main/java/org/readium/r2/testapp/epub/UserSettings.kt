@@ -182,8 +182,8 @@ open class UserSettings(var preferences: SharedPreferences, val context: Context
     open fun userSettingsPopUp(): PopupWindow {
 
         val layoutInflater = LayoutInflater.from(context)
-        val layout = layoutInflater.inflate(R.layout.popup_window_user_settings, null)
-        rootView = layout
+        var layout = layoutInflater.inflate(R.layout.popup_window_user_settings, null)
+//        rootView = layout
         val userSettingsPopup = PopupWindow(context)
         userSettingsPopup.contentView = layout
         userSettingsPopup.width = ListPopupWindow.WRAP_CONTENT
@@ -191,6 +191,7 @@ open class UserSettings(var preferences: SharedPreferences, val context: Context
         userSettingsPopup.isOutsideTouchable = true
         userSettingsPopup.isFocusable = true
 
+        layout = rootView
         val host = layout.findViewById(R.id.tabhost) as TabHost
         host.setup()
 
