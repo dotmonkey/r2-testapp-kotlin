@@ -130,6 +130,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
     protected var mode: ActionMode? = null
     protected var popupWindow: PopupWindow? = null
     open val customDB = false
+    open val customTTS = false
 
     /**
      * Manage activity creation.
@@ -972,6 +973,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
             userSettings.resourcePager = resourcePager
         }
 
+        if(customTTS) return
         if (this::screenReader.isInitialized) {
             if (tts_overlay.visibility == View.VISIBLE) {
                 if (screenReader.currentResource != resourcePager.currentItem) {
