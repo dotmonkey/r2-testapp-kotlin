@@ -262,7 +262,7 @@ open class EpubActivity : NavigatorInterface,R2EpubActivity(), CoroutineScope, N
      */
     override fun onStop() {
         super.onStop()
-        screenReader.stopReading()
+        if(!customTTS) screenReader.stopReading()
     }
 
     /**
